@@ -1,0 +1,13 @@
+.anim-slider li{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+.anim-slider li *{
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+.anim-slider{background-color: #fff;}
+.anim-slide{opacity: 0;}
+.anim-slide-this{opacity: 1;}
