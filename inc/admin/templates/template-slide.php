@@ -9,6 +9,16 @@
                 <input type="text" id="image_url" class="image_url regular-text" v-model="item.imgurl">
                 <input type="button" id="upload-btn" class="button-secondary upload-btn" value="Upload Image" @click="mediaPopup(key,item)">
             </div>
+            <table>
+                <tr>
+                    <td><input type="checkbox" v-model="item.width" value="100%"></td>
+                    <td> Fill the Width</td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox" v-model="item.height" value="100%"></td>
+                    <td> Fill the Height</td>
+                </tr>
+            </table>
         </div>
 
         <div v-if="item.type == 'text'">
@@ -73,7 +83,7 @@
             </tr>
             <tr>
                 <td>Delay : </td>
-                <td><input type="number" v-model="item.delayshow" id=""/></td>
+                <td><input type="number" v-model="delayTime" id=""/></td>
             </tr>
 
         </table>

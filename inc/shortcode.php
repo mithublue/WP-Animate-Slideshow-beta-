@@ -55,11 +55,12 @@ class WPAS_Shortcode {
                                 }
                                 $slideshow_style .= '}';
                             }
+
                             /**style stuff ends**/
                             switch( $layer_array->type ) {
                                 case 'image' :
                                     ?>
-                                    <img id="<?php echo $layer_id; ?>" src="<?php echo isset( $layer_array->imgurl ) ? $layer_array->imgurl : '' ; ?>" alt="image"/>
+                                    <img width="<?php echo isset( $layer_array->width[0] ) ? $layer_array->width[0] : ''; ?>" height="<?php echo isset( $layer_array->height[0] ) ? $layer_array->height[0] : ''; ?>" id="<?php echo $layer_id; ?>" src="<?php echo isset( $layer_array->imgurl ) ? $layer_array->imgurl : '' ; ?>" alt="image"/>
                                     <?php
                                     break;
                                 case 'text' :

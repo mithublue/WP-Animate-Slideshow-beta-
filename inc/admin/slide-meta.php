@@ -55,6 +55,7 @@ class WPAS_Slide_Meta_Box{
             <div v-for="( key, item ) in slide_meta.layers">
                 <meta_comp :item.sync="item" :key.sync="key"></meta_comp>
             </div>
+            <!--{{ $data.slide_meta | json}}-->
         </div>
         <script>
             var slide_meta = JSON.parse('<?php echo json_encode( get_post_meta( $slide_post->ID, 'slide_meta' , true ) )?>');
@@ -73,7 +74,10 @@ class WPAS_Slide_Meta_Box{
                         imgurl : "",
                         show: "",
                         hide: "",
-                        delayshow: "delaty1s" },
+                        delayShow: "delay1s",
+                        width : [],
+                        height : []
+                    },
 
                     text_layer_array : {
                         type : 'text',
@@ -87,7 +91,7 @@ class WPAS_Slide_Meta_Box{
                         },
                         show : 'fadeIn',
                         hide : 'fadeOut',
-                        delayshow : 'delaty1s'
+                        delayShow : 'delay1s'
                     }
                 },
                 components : {
@@ -102,7 +106,13 @@ class WPAS_Slide_Meta_Box{
                                     'rotateIn' , 'rotateOut' , 'rotateInUpRight' , 'rotateOutDownRight', 'rotateInUpLeft' , 'rotateOutDownLeft'
                                 ],
                                 font_weight_opt : [100,200,300,400,500,600,700,800,900,'bold','bolder','normal'],
-                                font_style_opt : ['italic','normal','oblique','initial']
+                                font_style_opt : ['italic','normal','oblique','initial'],
+                                delayTime : ''
+                            }
+                        },
+                        computed : {
+                            delayShow : function() {
+                                return 'delay' + delayTime + 's';
                             }
                         },
                         methods : {
