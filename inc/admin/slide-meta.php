@@ -40,16 +40,28 @@ class WPAS_Slide_Meta_Box{
      */
     function render_slide_content( $slide_post ){
 
+        include_once 'templates/template-slide.php';
+
         $parent_id = wp_get_post_parent_id( $slide_post->ID );
-        $slide_meta = get_post_meta( $slide_post->ID, 'slide_meta' , true );
-        include_once 'templates/template-slide.php'; ?>
+        $slide_meta = get_post_meta( $slide_post->ID, 'slide_meta' , true ); !is_array($slide_meta)? ( $slide_meta = array() ) : ''?>
+
         <input name="post_parent_id" type="hidden" value="<?php echo $parent_id? $parent_id : ( isset( $_GET['parent_id'] ) && is_numeric( $_GET['parent_id'] ) ? $_GET['parent_id'] : 0 ) ;?>"/>
         <div id="slideApp">
             <div id="slide-preview">
                 <div id="wp-animate-slider-<?php echo $slide_post->ID; ?>">
                     <ul class="anim-slider">
-                        <li class="anim-slide">
-
+                        <li v-for="( key, item ) in slide_meta.layers">
+                            <img id="#{{ key }}" :width="item.width[0]" :height="item.height[0]" alt="" src="{{ item.imgurl }}" v-if="item.type == 'image'"/>
+                            <p id="#{{ key }}" v-if="item.type == 'text'"
+                                style=":font-size : {{ item.settings['font-size'] }}px;
+                                :color: item.settings['color'];
+                                 :font-weight: item.settings['font-weight'];
+                                 :font-style: item.settings['font-style'];
+                                 :background-color: item.settings['background-color'];
+                                 :top : item.final_pos.top.val item.final_pos.top.unit;
+                                 :left : item.final_pos.left.val item.final_pos.left.unit;
+                                "
+                                >{{ item.content }}</p>
                         </li>
                     </ul>
                 </div>
