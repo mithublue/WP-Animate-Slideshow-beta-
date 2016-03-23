@@ -5,12 +5,26 @@ class WPAS_slider_meta_box {
     public function __construct() {
         add_action( 'add_meta_boxes', array( $this, 'add_slider_custom_box' ) );
         add_action( 'save_post', array( $this, 'save_postdata' ) );
+
+        //save before save_post hook
+        add_action('admin_head-post.php', array( $this, 'save_slider_data' ) );
+        add_action('admin_head-post-new.php', array( $this, 'save_slider_data' ) );
+
+        //ajax
+        add_action( 'wp_ajax_wpas_save_slider_settings', array( $this, 'wpas_save_slider_settings' ) );
     }
 
     /**
      * Add slider meata box
      */
     function add_slider_custom_box() {
+        add_meta_box(
+            'wpas_slider_settings',
+            __( 'Slider Settings', 'wpas' ),
+            array( $this, 'render_slider_settings') ,
+            'wpas_slider'
+        );
+
         add_meta_box(
             'wpas_slider_meta',
             __( 'Slides', 'wpas' ),
@@ -23,6 +37,69 @@ class WPAS_slider_meta_box {
             array( $this, 'render_slider_shortcode') ,
             'wpas_slider'
         );
+    }
+
+    /**
+     * Slider settings
+     */
+    function render_slider_settings( $slider_post ) {
+        ?>
+        <div id="sliderApp">
+            <table>
+                <tr>
+                    <td>Slider Width : </td>
+                    <td><input type="number" v-model="settings.width">
+                        <select v-model="settings.w_unit">
+                            <option value="px">PX</option>
+                            <option value="%">%</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Slider Height : </td>
+                    <td><input type="number" v-model="settings.height">
+                        <select v-model="settings.h_unit">
+                            <option value="px">PX</option>
+                            <option value="%">%</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox" v-model="settings.autoplay"></td>
+                    <td>Enable autoplay</td>
+                </tr>
+                <tr>
+                    <td>Slide change interval: </td>
+                    <td><input type="number" v-model="settings.intNumber" @change="senInterval"> second(s)</td>
+                </tr>
+
+            </table>
+            <?php $slider_settings = json_encode(get_post_meta( $slider_post->ID, 'slider_settings', true ));// var_dump($slider_settings); ?>
+        </div>
+        <script>
+            var slider_settings = JSON.parse('<?php echo $slider_settings; ?>'); console.log(slider_settings);
+            var initial_settings = { autoplay	: true,
+                interval	: 1000,
+                intNumber : 1,
+                width : 500 ,
+                w_unit : 'px',
+                height : 300,
+                h_unit : 'px'
+            };
+            typeof  slider_settings != "object" ? ( slider_settings = initial_settings ) : '';
+            var vm = new Vue({
+                el : '#sliderApp',
+                data : {
+                    settings : slider_settings
+                },
+                methods : {
+                    senInterval : function() {
+                        vm.settings.interval = ( vm.settings.intNumber * 1000 );
+                    }
+                }
+            })
+        </script>
+        <?php
     }
 
     /**
@@ -81,6 +158,47 @@ class WPAS_slider_meta_box {
 
     }
 
+
+    /**
+     * Save slider data before save_post
+     */
+    function save_slider_data() {
+        global $post;
+        if('wpas_slider' === $post->post_type){
+            ?>
+            <script>
+                jQuery(document).ready(function($){
+                    //Click handler - you might have to bind this click event another way
+                    $('input#publish, input#save-post').click(function(){
+                        var slider_settings = vm.$data.settings;
+                        $.post(
+                            ajaxurl,
+                            {
+                                action : 'wpas_save_slider_settings',
+                                slider_settings : JSON.stringify(slider_settings),
+                                post_id : '<?php echo $post->ID ?>'
+                            },
+                            function(data) {
+                            }
+                        );
+                    });
+                });
+            </script>
+            <?php
+        }
+    }
+
+
+    /**
+     * Run ajax to save slider settings
+     */
+    function wpas_save_slider_settings() {
+        if ( !is_numeric($_POST['post_id']) || get_post_type( $_POST['post_id'] ) != 'wpas_slider' ) {
+            return;
+        }
+        update_post_meta( $_POST['post_id'], 'slider_settings', (array)json_decode( stripslashes( $_POST['slider_settings'] ) ) );
+        exit;
+    }
 
     public static function init() {
         new WPAS_slider_meta_box();

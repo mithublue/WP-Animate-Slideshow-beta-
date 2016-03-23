@@ -41,9 +41,19 @@ class WPAS_Slide_Meta_Box{
     function render_slide_content( $slide_post ){
 
         $parent_id = wp_get_post_parent_id( $slide_post->ID );
+        $slide_meta = get_post_meta( $slide_post->ID, 'slide_meta' , true );
         include_once 'templates/template-slide.php'; ?>
         <input name="post_parent_id" type="hidden" value="<?php echo $parent_id? $parent_id : ( isset( $_GET['parent_id'] ) && is_numeric( $_GET['parent_id'] ) ? $_GET['parent_id'] : 0 ) ;?>"/>
         <div id="slideApp">
+            <div id="slide-preview">
+                <div id="wp-animate-slider-<?php echo $slide_post->ID; ?>">
+                    <ul class="anim-slider">
+                        <li class="anim-slide">
+
+                        </li>
+                    </ul>
+                </div>
+            </div>
             <div class="add_layer_panel">
                 <select name="laye_type" id="layer_type" v-model="selected_layer_type">
                     <option value="Select layer type" selected>Select layer type</option>
@@ -55,10 +65,9 @@ class WPAS_Slide_Meta_Box{
             <div v-for="( key, item ) in slide_meta.layers">
                 <meta_comp :item.sync="item" :key.sync="key"></meta_comp>
             </div>
-            <!--{{ $data.slide_meta | json}}-->
         </div>
         <script>
-            var slide_meta = JSON.parse('<?php echo json_encode( get_post_meta( $slide_post->ID, 'slide_meta' , true ) )?>');
+            var slide_meta = JSON.parse('<?php echo json_encode( $slide_meta )?>');
             typeof  slide_meta != "object" ? ( slide_meta = { layers : {}} ) : '';
             var vm = new Vue({
 
@@ -76,7 +85,8 @@ class WPAS_Slide_Meta_Box{
                         hide: "",
                         delayShow: "delay1s",
                         width : [],
-                        height : []
+                        height : [],
+                        delayTime : 1
                     },
 
                     text_layer_array : {
@@ -91,7 +101,8 @@ class WPAS_Slide_Meta_Box{
                         },
                         show : 'fadeIn',
                         hide : 'fadeOut',
-                        delayShow : 'delay1s'
+                        delayShow : 'delay1s',
+                        delayTime : 1
                     }
                 },
                 components : {
@@ -106,16 +117,13 @@ class WPAS_Slide_Meta_Box{
                                     'rotateIn' , 'rotateOut' , 'rotateInUpRight' , 'rotateOutDownRight', 'rotateInUpLeft' , 'rotateOutDownLeft'
                                 ],
                                 font_weight_opt : [100,200,300,400,500,600,700,800,900,'bold','bolder','normal'],
-                                font_style_opt : ['italic','normal','oblique','initial'],
-                                delayTime : ''
-                            }
-                        },
-                        computed : {
-                            delayShow : function() {
-                                return 'delay' + delayTime + 's';
+                                font_style_opt : ['italic','normal','oblique','initial']
                             }
                         },
                         methods : {
+                            setDelay : function(item){
+                                item.delayShow = 'delay' + item.delayTime + 's';
+                            },
                             removeLayer : function(key, item) {
                                 var temp_slide_meta = {};
                                 for( k  in vm.slide_meta.layers ) {
@@ -136,7 +144,6 @@ class WPAS_Slide_Meta_Box{
                                         var uploaded_image = image.state().get('selection').first();
                                         // We convert uploaded_image to a JSON object to make accessing it easier
                                         // Output to the console uploaded_image
-                                        console.log(uploaded_image);
                                         var image_url = uploaded_image.toJSON().url;
                                         // Let's assign the url value to the input field
                                         //$('.image_url').val(image_url);

@@ -64,8 +64,18 @@
         <table v-if="item.type != 'Select layer type'">
             <tr>
                 <td><label>position : </label></td>
-                <td>x : <input type="number" v-model="item.final_pos.x"/>
-                    y : <input type="number" v-model="item.final_pos.y"/></td>
+                <td>x : <input type="number" v-model="item.final_pos.top.val"/>
+                    <select v-model="item.final_pos.top.unit">
+                        <option value="px">PX</option>
+                        <option value="%">%</option>
+                    </select>
+                    y : <input type="number" v-model="item.final_pos.left.val"/>
+                    <select v-model="item.final_pos.left.unit">
+                        <option value="px">PX</option>
+                        <option value="%">%</option>
+                    </select>
+
+                </td>
             </tr>
             <tr>
                 <td> Show animation : </td>
@@ -83,7 +93,7 @@
             </tr>
             <tr>
                 <td>Delay : </td>
-                <td><input type="number" v-model="delayTime" id=""/></td>
+                <td><input type="number" v-model="item.delayTime" @change="setDelay(item)"/></td>
             </tr>
 
         </table>

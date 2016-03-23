@@ -17,11 +17,14 @@ class WPAS_Shortcode {
         $slides = get_posts(array(
             'posts_per_page' => -1,
             'post_type' => 'wpas_slide',
-            'post_parent' => 'wpas_slider',
+            'post_parent' => $atts['id'],
             'post_status' => 'publish'
         ));
-         ?>
-        <div id="wp-animate-slider-<?php echo $atts['id']?>">
+
+        $slider_settings =  get_post_meta( $atts['id'], 'slider_settings', true );
+        ?>
+
+        <div id="wp-animate-slider-<?php echo $atts['id']?>" style="width: <?php echo $slider_settings['width'].$slider_settings['w_unit'] ?>; height: <?php echo $slider_settings['height'].$slider_settings['h_unit'] ?>; ">
             <ul class="anim-slider">
 
                 <?php $slides_array = array();
@@ -50,8 +53,9 @@ class WPAS_Shortcode {
 
                             if( isset( $layer_array->final_pos ) && is_object( $layer_array->final_pos ) ) {
                                 $slideshow_style .= '#'.$layer_id.'{';
-                                foreach( $layer_array->final_pos as $property => $value ) {
-                                    $slideshow_style .= ( $property == 'x' ? 'top' : 'left' ) . ' : ' .$value. 'px;' ;
+                                foreach( $layer_array->final_pos as $property => $val_array ) {
+                                    $slideshow_style .= $property .' : ' . $val_array->val . $val_array->unit.';' ;
+                                    //$slideshow_style .= ( $property == 'x' ? 'top' : 'left' ) . ' : ' .$value. 'px;' ;
                                 }
                                 $slideshow_style .= '}';
                             }
@@ -88,14 +92,14 @@ class WPAS_Shortcode {
         <script>
             (function($){
                 $(document).ready(function(){
-                    //console.log(JSON.parse('<?php echo $slides_array; ?>'));
+                    var slider_settings = JSON.parse('<?php echo json_encode($slider_settings); ?>');
                     var anim_data = new Object({
-                        autoplay	:true,
-                        interval	:5500,
                         animations : {}
                     });
+                    for( s in slider_settings) {
+                        anim_data[s] = slider_settings[s];
+                    }
                     var slides_array = JSON.parse('<?php echo $slides_array; ?>');
-                    //console.log(slides_array);
                     if ( typeof slides_array != "string") {
                         for( k in slides_array ) {
                             var tmp_array = {};
@@ -103,10 +107,8 @@ class WPAS_Shortcode {
                                 tmp_array['#'+key] = slides_array[k][key];
                             }
                             anim_data.animations[k] = tmp_array;
-                            //console.log(anim_data.animations[k]);
                         }
                     }
-                    console.log(anim_data);
                     $('.anim-slider').animateSlider(anim_data);
                 })
             }(jQuery))
